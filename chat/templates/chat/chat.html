@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with LLM</title>
+    <title>Chat Conversations</title>
     <style>
         * {
             margin: 0;
@@ -20,331 +20,334 @@
             justify-content: center;
         }
 
-        .chat-container {
+        .main-container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 800px;
-            height: 80vh;
+            width: 95%;
+            max-width: 1200px;
+            height: 85vh;
             display: flex;
-            flex-direction: column;
             overflow: hidden;
         }
 
-        .chat-header {
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 25px 20px;
             text-align: center;
+        }
+
+        .sidebar-title {
             font-size: 24px;
             font-weight: 600;
+            margin-bottom: 5px;
         }
 
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f8f9fa;
+        .sidebar-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
         }
 
-        .message {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message.assistant {
-            justify-content: flex-start;
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: 15px 20px;
-            border-radius: 20px;
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-
-        .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .new-chat-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
-            border-bottom-right-radius: 5px;
-        }
-
-        .message.assistant .message-content {
-            background: white;
-            color: #333;
-            border: 1px solid #e9ecef;
-            border-bottom-left-radius: 5px;
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            margin: 0 10px;
-        }
-
-        .message.user .message-avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .message.assistant .message-avatar {
-            background: #28a745;
-            color: white;
-        }
-
-        .chat-input-container {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .chat-input-form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .chat-input:focus {
-            border-color: #667eea;
-        }
-
-        .send-button {
-            padding: 15px 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+            padding: 12px 20px;
             border-radius: 25px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease;
+            margin: 20px;
+            transition: all 0.3s ease;
         }
 
-        .send-button:hover {
+        .new-chat-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
         }
 
-        .send-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 20px;
         }
 
-        .typing-indicator {
-            display: none;
-            padding: 15px 20px;
+        .conversation-item {
             background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             border: 1px solid #e9ecef;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            color: #666;
-            font-style: italic;
         }
 
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px 20px;
-            border-radius: 10px;
+        .conversation-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .conversation-item.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .conversation-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+            line-height: 1.3;
+        }
+
+        .conversation-meta {
+            font-size: 12px;
+            opacity: 0.8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversation-item.active .conversation-meta {
+            opacity: 0.9;
+        }
+
+        .conversation-preview {
+            font-size: 13px;
+            margin: 8px 0;
+            opacity: 0.7;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .conversation-item.active .conversation-preview {
+            opacity: 0.9;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 80px;
             margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .welcome-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .start-chat-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .start-chat-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .empty-state {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-state.show {
+            display: block;
+        }
+
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .empty-subtitle {
+            font-size: 16px;
+            color: #999;
         }
 
         @media (max-width: 768px) {
-            .chat-container {
-                width: 95%;
+            .main-container {
+                width: 98%;
                 height: 90vh;
+                flex-direction: column;
             }
             
-            .message-content {
-                max-width: 85%;
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .conversations-list {
+                padding: 0 15px 15px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .welcome-title {
+                font-size: 24px;
+            }
+            
+            .welcome-subtitle {
+                font-size: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            💬 Chat with LLM
-        </div>
-        
-        <div class="chat-messages" id="chatMessages">
-            <div class="message assistant">
-                <div class="message-avatar">AI</div>
-                <div class="message-content">
-                    Hello! I'm your AI assistant. How can I help you today?
-                </div>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">💬 Chat</div>
+                <div class="sidebar-subtitle">Your Conversations</div>
+            </div>
+            
+            <button class="new-chat-button" onclick="createNewConversation()">
+                ✨ New Chat
+            </button>
+            
+            <div class="conversations-list" id="conversationsList">
+                {% if conversations %}
+                    {% for conversation in conversations %}
+                    <div class="conversation-item" onclick="openConversation({{ conversation.id }})">
+                        <div class="conversation-title">{{ conversation.title }}</div>
+                        <div class="conversation-preview">{{ conversation.get_first_message_preview }}</div>
+                        <div class="conversation-meta">
+                            <span>{{ conversation.get_message_count }} messages</span>
+                            <span>{{ conversation.updated_at|date:"M j" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
         
-        <div class="typing-indicator" id="typingIndicator">
-            AI is typing...
-        </div>
-        
-        <div class="chat-input-container">
-            <form class="chat-input-form" id="chatForm">
-                <input 
-                    type="text" 
-                    class="chat-input" 
-                    id="messageInput" 
-                    placeholder="Type your message here..."
-                    autocomplete="off"
-                >
-                <button type="submit" class="send-button" id="sendButton">
-                    Send
+        <div class="main-content" id="mainContent">
+            {% if conversations %}
+                <div class="welcome-icon">👋</div>
+                <div class="welcome-title">Welcome back!</div>
+                <div class="welcome-subtitle">
+                    Select a conversation from the sidebar to continue chatting,<br>
+                    or start a new conversation to begin fresh.
+                </div>
+                <button class="start-chat-button" onclick="createNewConversation()">
+                    Start New Chat
                 </button>
-            </form>
+            {% else %}
+                <div class="empty-state show">
+                    <div class="empty-icon">💬</div>
+                    <div class="empty-title">No conversations yet</div>
+                    <div class="empty-subtitle">Start your first chat to begin!</div>
+                </div>
+            {% endif %}
         </div>
     </div>
 
     <script>
-        class ChatInterface {
+        class ConversationList {
             constructor() {
-                this.chatMessages = document.getElementById('chatMessages');
-                this.messageInput = document.getElementById('messageInput');
-                this.sendButton = document.getElementById('sendButton');
-                this.chatForm = document.getElementById('chatForm');
-                this.typingIndicator = document.getElementById('typingIndicator');
-                this.sessionId = this.generateSessionId();
-                
+                this.conversationsList = document.getElementById('conversationsList');
+                this.mainContent = document.getElementById('mainContent');
                 this.setupEventListeners();
             }
             
-            generateSessionId() {
-                return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            }
-            
             setupEventListeners() {
-                this.chatForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.sendMessage();
-                });
-                
-                this.messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        this.sendMessage();
-                    }
-                });
+                // Add any additional event listeners here
             }
             
-            async sendMessage() {
-                const message = this.messageInput.value.trim();
-                if (!message) return;
-                
-                // Add user message to chat
-                this.addMessage('user', message);
-                
-                // Clear input and disable send button
-                this.messageInput.value = '';
-                this.sendButton.disabled = true;
-                
-                // Show typing indicator
-                this.showTypingIndicator();
-                
+            async createNewConversation() {
                 try {
-                    const response = await fetch('/api/send/', {
+                    const response = await fetch('/api/conversation/create/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            message: message,
-                            session_id: this.sessionId
+                            title: 'New Conversation'
                         })
                     });
                     
                     const data = await response.json();
                     
                     if (data.success) {
-                        // Add AI response to chat
-                        this.addMessage('assistant', data.response);
+                        // Redirect to the new conversation
+                        window.location.href = `/conversation/${data.conversation_id}/`;
                     } else {
-                        this.showError(data.error || 'Failed to get response');
+                        alert('Failed to create conversation');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    this.showError('Failed to send message. Please try again.');
-                } finally {
-                    // Hide typing indicator and re-enable send button
-                    this.hideTypingIndicator();
-                    this.sendButton.disabled = false;
-                    this.messageInput.focus();
+                    alert('Failed to create conversation');
                 }
             }
             
-            addMessage(role, content) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${role}`;
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'message-avatar';
-                avatar.textContent = role === 'user' ? 'U' : 'AI';
-                
-                const messageContent = document.createElement('div');
-                messageContent.className = 'message-content';
-                messageContent.textContent = content;
-                
-                messageDiv.appendChild(avatar);
-                messageDiv.appendChild(messageContent);
-                
-                this.chatMessages.appendChild(messageDiv);
-                
-                // Scroll to bottom
-                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-            }
-            
-            showTypingIndicator() {
-                this.typingIndicator.style.display = 'block';
-                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-            }
-            
-            hideTypingIndicator() {
-                this.typingIndicator.style.display = 'none';
-            }
-            
-            showError(message) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                errorDiv.textContent = message;
-                
-                this.chatMessages.appendChild(errorDiv);
-                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-                
-                // Remove error message after 5 seconds
-                setTimeout(() => {
-                    if (errorDiv.parentNode) {
-                        errorDiv.parentNode.removeChild(errorDiv);
-                    }
-                }, 5000);
+            openConversation(conversationId) {
+                window.location.href = `/conversation/${conversationId}/`;
             }
         }
         
-        // Initialize chat interface when page loads
+        // Global functions for onclick handlers
+        function createNewConversation() {
+            conversationList.createNewConversation();
+        }
+        
+        function openConversation(conversationId) {
+            conversationList.openConversation(conversationId);
+        }
+        
+        // Initialize conversation list when page loads
+        let conversationList;
         document.addEventListener('DOMContentLoaded', () => {
-            new ChatInterface();
+            conversationList = new ConversationList();
         });
     </script>
 </body>

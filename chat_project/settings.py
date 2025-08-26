@@ -133,3 +133,7 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-3.5-turbo')  # Default model
 OPENAI_MAX_TOKENS = int(os.environ.get('OPENAI_MAX_TOKENS', '1000'))
 OPENAI_TEMPERATURE = float(os.environ.get('OPENAI_TEMPERATURE', '0.7'))
+
+# Posthog Configuration
+POSTHOG_API_KEY = os.environ.get('POSTHOG_API_KEY', '')
+

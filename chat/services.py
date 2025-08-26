@@ -1,8 +1,11 @@
-from openai import OpenAI
+from posthog.ai.openai import OpenAI
+from posthog import Posthog
 from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
+
+posthog = Posthog(settings.POSTHOG_API_KEY, host="https://us.i.posthog.com")
 
 class OpenAIService:
     def __init__(self):
@@ -15,7 +18,7 @@ class OpenAIService:
             logger.warning("OpenAI API key not found in environment variables")
         
         # Initialize OpenAI client
-        self.client = OpenAI(api_key=self.api_key) if self.api_key else None
+        self.client = OpenAI(api_key=self.api_key, posthog_client=posthog) if self.api_key else None
         
         logger.info(f"OpenAI service initialized with model: {self.model}")
     

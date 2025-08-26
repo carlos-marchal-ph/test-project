@@ -22,13 +22,14 @@ class OpenAIService:
         
         logger.info(f"OpenAI service initialized with model: {self.model}")
     
-    def get_chat_response(self, messages, model=None):
+    def get_chat_response(self, messages, model=None, posthog_trace_id=None):
         """
         Get a response from OpenAI chat completion API
         
         Args:
             messages: List of message dictionaries with 'role' and 'content'
             model: OpenAI model to use (defaults to settings.OPENAI_MODEL)
+            posthog_trace_id: Optional trace ID for PostHog tracking
         
         Returns:
             str: The AI response content
@@ -41,10 +42,18 @@ class OpenAIService:
         
         try:
             logger.info(f"Making OpenAI API call with model: {model_to_use}")
-            response = self.client.chat.completions.create(
-                model=model_to_use,
-                messages=messages
-            )
+            
+            # Prepare completion parameters
+            completion_params = {
+                "model": model_to_use,
+                "messages": messages
+            }
+            
+            # Add posthog_trace_id if provided
+            if posthog_trace_id:
+                completion_params["posthog_trace_id"] = posthog_trace_id
+            
+            response = self.client.chat.completions.create(**completion_params)
             
             return response.choices[0].message.content
             

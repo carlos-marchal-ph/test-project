@@ -57,8 +57,11 @@ def send_message(request):
         conversation_messages = conversation.messages.all()
         messages_for_api = openai_service.format_messages_for_api(conversation_messages)
         
+        # Create posthog trace ID for tracking
+        posthog_trace_id = f"convo-{conversation.id}"
+        
         # Get AI response
-        ai_response = openai_service.get_chat_response(messages_for_api)
+        ai_response = openai_service.get_chat_response(messages_for_api, posthog_trace_id=posthog_trace_id)
         
         # Save AI response
         ai_chat_message = ChatMessage.objects.create(

@@ -60,8 +60,19 @@ def send_message(request):
         # Create posthog trace ID for tracking
         posthog_trace_id = f"convo-{conversation.id}"
         
+        # Calculate message index (this will be the AI response message index)
+        user_message_count = conversation.messages.filter(role='user').count()
+        
+        # Create ai trace name: conversation title + message index
+        conversation_title = conversation.title or f"Conversation {conversation.id}"
+        ai_span_name = f"{conversation_title} - Message {user_message_count}"
+        
         # Get AI response
-        ai_response = openai_service.get_chat_response(messages_for_api, posthog_trace_id=posthog_trace_id)
+        ai_response = openai_service.get_chat_response(
+            messages_for_api, 
+            posthog_trace_id=posthog_trace_id,
+            ai_span_name=ai_span_name
+        )
         
         # Save AI response
         ai_chat_message = ChatMessage.objects.create(

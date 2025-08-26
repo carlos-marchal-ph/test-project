@@ -22,7 +22,7 @@ class OpenAIService:
         
         logger.info(f"OpenAI service initialized with model: {self.model}")
     
-    def get_chat_response(self, messages, model=None, posthog_trace_id=None):
+    def get_chat_response(self, messages, model=None, posthog_trace_id=None, ai_span_name=None):
         """
         Get a response from OpenAI chat completion API
         
@@ -30,6 +30,7 @@ class OpenAIService:
             messages: List of message dictionaries with 'role' and 'content'
             model: OpenAI model to use (defaults to settings.OPENAI_MODEL)
             posthog_trace_id: Optional trace ID for PostHog tracking
+            ai_span_name: Optional trace name for PostHog tracking (will be sent as $ai_span_name)
         
         Returns:
             str: The AI response content
@@ -52,6 +53,12 @@ class OpenAIService:
             # Add posthog_trace_id if provided
             if posthog_trace_id:
                 completion_params["posthog_trace_id"] = posthog_trace_id
+            
+            # Add ai_span_name if provided (PostHog will receive this as $ai_span_name)
+            if ai_span_name:
+                completion_params["posthog_properties"] = {
+                    "$ai_span_name": ai_span_name
+                }
             
             response = self.client.chat.completions.create(**completion_params)
             

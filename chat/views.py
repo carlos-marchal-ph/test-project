@@ -5,6 +5,7 @@ from django.views.decorators.http import require_http_methods
 import json
 import uuid
 from .models import ChatMessage, Conversation
+from .services import OpenAIService
 
 def chat_view(request):
     """Main chat interface view - shows conversation list"""
@@ -49,8 +50,15 @@ def send_message(request):
             content=user_message
         )
         
-        # Generate AI response (simple echo for now, you can integrate with actual LLM here)
-        ai_response = f"I received your message: '{user_message}'. This is a placeholder response. In a real implementation, you would integrate with an LLM API here."
+        # Get AI response using OpenAI
+        openai_service = OpenAIService()
+        
+        # Get conversation history for context
+        conversation_messages = conversation.messages.all()
+        messages_for_api = openai_service.format_messages_for_api(conversation_messages)
+        
+        # Get AI response
+        ai_response = openai_service.get_chat_response(messages_for_api)
         
         # Save AI response
         ai_chat_message = ChatMessage.objects.create(

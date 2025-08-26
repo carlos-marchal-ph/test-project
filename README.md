@@ -1,16 +1,18 @@
 # Django Chat Interface
 
-A modern, responsive chat interface built with Django for interacting with Large Language Models (LLMs).
+A modern, responsive chat interface built with Django for interacting with OpenAI's Large Language Models (LLMs).
 
 ## Features
 
 - 🎨 **Modern UI**: Beautiful, responsive design with gradient backgrounds and smooth animations
 - 💬 **Real-time Chat**: Interactive chat interface with typing indicators
+- 🤖 **OpenAI Integration**: Powered by GPT-3.5-turbo for intelligent responses
 - 📱 **Mobile Responsive**: Works seamlessly on desktop and mobile devices
 - 🔄 **Session Management**: Maintains chat history with unique session IDs
 - 💾 **Database Storage**: Stores all chat messages in SQLite database
 - 🛠️ **Admin Interface**: Django admin panel for managing chat messages
 - 🚀 **RESTful API**: Clean API endpoints for sending messages and retrieving history
+- 🧠 **Conversation Memory**: AI remembers conversation context for coherent responses
 
 ## Screenshots
 
@@ -24,6 +26,7 @@ The interface features:
 
 - Python 3.8 or higher
 - pip (Python package installer)
+- OpenAI API key (get one at [https://platform.openai.com/](https://platform.openai.com/))
 
 ## Installation
 
@@ -43,23 +46,35 @@ The interface features:
    pip install -r requirements.txt
    ```
 
-4. **Run database migrations**
+4. **Set up OpenAI API key**
+   
+   Create a `.env` file in the project root:
+   ```bash
+   cp env.example .env
+   ```
+   
+   Edit `.env` and add your OpenAI API key:
+   ```bash
+   OPENAI_API_KEY=your_actual_openai_api_key_here
+   ```
+
+5. **Run database migrations**
    ```bash
    python manage.py makemigrations
    python manage.py migrate
    ```
 
-5. **Create superuser (optional, for admin access)**
+6. **Create superuser (optional, for admin access)**
    ```bash
    python manage.py createsuperuser
    ```
 
-6. **Run the development server**
+7. **Run the development server**
    ```bash
    python manage.py runserver
    ```
 
-7. **Open your browser and navigate to**
+8. **Open your browser and navigate to**
    ```
    http://127.0.0.1:8000/
    ```
@@ -103,13 +118,68 @@ test-project/
 ### Send Message
 - **URL**: `/api/send/`
 - **Method**: POST
-- **Body**: `{"message": "Your message", "session_id": "optional_session_id"}`
-- **Response**: `{"success": true, "response": "AI response", "session_id": "session_id"}`
+- **Body**: `{"message": "Your message", "conversation_id": "optional_conversation_id"}`
+- **Response**: `{"success": true, "response": "AI response", "conversation_id": "conversation_id"}`
 
 ### Get Chat History
-- **URL**: `/api/history/<session_id>/`
+- **URL**: `/api/history/<conversation_id>/`
 - **Method**: GET
 - **Response**: `{"messages": [{"role": "user", "content": "...", "timestamp": "..."}]}`
+
+### Create Conversation
+- **URL**: `/api/conversation/create/`
+- **Method**: POST
+- **Body**: `{"title": "Conversation title"}`
+- **Response**: `{"success": true, "conversation_id": "id", "title": "title"}`
+
+### Delete Conversation
+- **URL**: `/api/conversation/<conversation_id>/delete/`
+- **Method**: DELETE
+- **Response**: `{"success": true}`
+
+## OpenAI Integration
+
+This project now includes full OpenAI integration:
+
+### Features
+- **GPT-3.5-turbo**: Uses OpenAI's latest chat model
+- **Conversation Memory**: AI remembers the full conversation context
+- **Error Handling**: Graceful handling of API errors, rate limits, and authentication issues
+- **Configurable**: Easy to switch models or adjust parameters
+
+### Configuration
+The OpenAI integration is configured through environment variables:
+
+```bash
+# Required
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional (can be set in settings.py)
+OPENAI_MODEL=gpt-3.5-turbo  # Default model
+OPENAI_MAX_TOKENS=1000      # Maximum response length
+OPENAI_TEMPERATURE=0.7      # Response creativity (0.0-1.0)
+```
+
+### How It Works
+1. User sends a message
+2. System formats the conversation history for OpenAI API
+3. OpenAI generates a contextual response
+4. Response is saved to the database
+5. User receives the AI response
+
+### Customization
+You can easily customize the AI behavior by modifying `chat/services.py`:
+
+```python
+# Change the model
+ai_response = openai_service.get_chat_response(messages_for_api, model="gpt-4")
+
+# Adjust system prompt
+messages.append({
+    "role": "system",
+    "content": "You are a helpful coding assistant. Provide code examples and explanations."
+})
+```
 
 ## Customization
 
